@@ -1,0 +1,220 @@
+#include <stdio.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
+
+// Function prototypes
+void initializeBoard(char board[][5], int size);
+void printBoard(const char board[][5], int size);
+bool isWinningMove(const char board[][5], int row, int col, char symbol, int size);
+bool isBoardFull(const char board[][5], int size);
+void playerMove(char board[][5], char symbol, int size, const char *playerName);
+void switchPlayer(char *currentPlayer, char **currentPlayerName, const char *playerX, const char *playerO);
+void announceWinner(const char *winnerName, char symbol);
+void announceDraw();
+int selectBoardSize();
+void getPlayerNames(char *playerX, char *playerO);
+
+int main() {
+    int size = selectBoardSize();  // Let the user choose the board size
+    char board[5][5];              // Maximum size is 5x5
+    char currentPlayer = 'X';
+    bool gameOver = false;
+
+    // Get player names
+    char playerX[50], playerO[50];
+    getPlayerNames(playerX, playerO);
+
+    char *currentPlayerName = playerX;  // Start with Player X
+
+    initializeBoard(board, size);
+
+    printf("\nWelcome to %dx%d Tic Tac Toe!\n", size, size);
+    printf("Player X: %s\n", playerX);
+    printf("Player O: %s\n", playerO);
+    printf("Let's begin!\n\n");
+
+    while (!gameOver) {
+        printBoard(board, size);
+        playerMove(board, currentPlayer, size, currentPlayerName);
+
+        // Check for win
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                if (board[i][j] == currentPlayer && isWinningMove(board, i, j, currentPlayer, size)) {
+                    printBoard(board, size);
+                    announceWinner(currentPlayerName, currentPlayer);
+                    gameOver = true;
+                    break;
+                }
+            }
+            if (gameOver) break;
+        }
+
+        // Check for draw
+        if (!gameOver && isBoardFull(board, size)) {
+            printBoard(board, size);
+            announceDraw();
+            gameOver = true;
+        }
+
+        // Switch player
+        if (!gameOver) {
+            switchPlayer(&currentPlayer, &currentPlayerName, playerX, playerO);
+        }
+    }
+
+    return 0;
+}
+
+// Let the user choose the board size
+int selectBoardSize() {
+    int size;
+    printf("Select board size:\n");
+    printf("1. 4x4\n");
+    printf("2. 5x5\n");
+    printf("Enter your choice (1 or 2): ");
+    scanf("%d", &size);
+
+    while (size != 1 && size != 2) {
+        printf("Invalid choice. Please enter 1 for 4x4 or 2 for 5x5: ");
+        scanf("%d", &size);
+    }
+
+    return (size == 1) ? 4 : 5;  // Return 4 for 4x4, 5 for 5x5
+}
+
+// Get player names
+void getPlayerNames(char *playerX, char *playerO) {
+    printf("Enter Player X's name: ");
+    scanf("%s", playerX);
+    printf("Enter Player O's name: ");
+    scanf("%s", playerO);
+}
+
+// Initialize the board with empty spaces
+void initializeBoard(char board[][5], int size) {
+    for (int i = 0; i < size; i++) {
+        for (int j = 0; j < size; j++) {
+            board[i][j] = '-';
+        }
+    }
+}
+
+// Print the current state of the board
+void printBoard(const char board[][5], int size) {
+    printf("\n");
+    for (int i = 0; i < size; i++) {
+        for (int j = 0; j < size; j++) {
+            printf(" %c ", board[i][j]);
+        }
+        printf("\n");
+    }
+    printf("\n");
+}
+
+// Check if the current move is a winning move
+bool isWinningMove(const char board[][5], int row, int col, char symbol, int size) {
+    int count;
+
+    // Check row
+    count = 0;
+    for (int j = 0; j < size; j++) {
+        if (board[row][j] == symbol) {
+            count++;
+            if (count == size) return true;
+        } else {
+            count = 0;
+        }
+    }
+
+    // Check column
+    count = 0;
+    for (int i = 0; i < size; i++) {
+        if (board[i][col] == symbol) {
+            count++;
+            if (count == size) return true;
+        } else {
+            count = 0;
+        }
+    }
+
+    // Check main diagonal
+    if (row == col) {
+        count = 0;
+        for (int i = 0; i < size; i++) {
+            if (board[i][i] == symbol) {
+                count++;
+                if (count == size) return true;
+            } else {
+                count = 0;
+            }
+        }
+    }
+
+    // Check anti-diagonal
+    if (row + col == size - 1) {
+        count = 0;
+        for (int i = 0; i < size; i++) {
+            if (board[i][size - 1 - i] == symbol) {
+                count++;
+                if (count == size) return true;
+            } else {
+                count = 0;
+            }
+        }
+    }
+
+    return false;
+}
+
+// Check if the board is full
+bool isBoardFull(const char board[][5], int size) {
+    for (int i = 0; i < size; i++) {
+        for (int j = 0; j < size; j++) {
+            if (board[i][j] == '-') return false;
+        }
+    }
+    return true;
+}
+
+// Handle player's move
+void playerMove(char board[][5], char symbol, int size, const char *playerName) {
+    int row, col;
+    while (true) {
+        printf("%s (%c), enter your move (row column): ", playerName, symbol);
+        if (scanf("%d %d", &row, &col) != 2) {
+            printf("Invalid input. Please enter two integers.\n");
+            while (getchar() != '\n');  // Clear the input buffer
+            continue;
+        }
+
+        if (row >= 0 && row < size && col >= 0 && col < size && board[row][col] == '-') {
+            board[row][col] = symbol;
+            break;
+        } else {
+            printf("Invalid move. Try again.\n");
+        }
+    }
+}
+
+// Switch the current player
+void switchPlayer(char *currentPlayer, char **currentPlayerName, const char *playerX, const char *playerO) {
+    if (*currentPlayer == 'X') {
+        *currentPlayer = 'O';
+        *currentPlayerName = (char *)playerO;
+    } else {
+        *currentPlayer = 'X';
+        *currentPlayerName = (char *)playerX;
+    }
+}
+
+// Announce the winner
+void announceWinner(const char *winnerName, char symbol) {
+    printf("Congratulations, %s (%c)! You win!\n", winnerName, symbol);
+}
+
+// Announce a draw
+void announceDraw() {
+    printf("It's a draw! Well played, both players!\n");
+}
