@@ -1,5 +1,6 @@
 # TIC-TAC-TOE
 This is a Tic Tac Toe game in 4x4 and 5x5 implemented in C. The game allows two players to play on either a 4x4 or 5x5 board. Players can enter their names, and the game will display their names during gameplay. The game checks for a win or a draw after each move and announces the result at the end.
+
 Playing mode :
 
 1.Save the code in a file (tictactoe.c).
