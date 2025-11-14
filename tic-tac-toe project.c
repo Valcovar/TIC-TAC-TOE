@@ -217,4 +217,5 @@ void announceWinner(const char *winnerName, char symbol) {
 // Announce a draw
 void announceDraw() {
     printf("It's a draw! Well played, both players!\n");
+
 }
